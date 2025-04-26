@@ -1,9 +1,15 @@
-import 'dotenv/config';
+import dotenv from 'dotenv';
+import * as path from 'path';
 import express from 'express';
 import bodyParser from 'body-parser';
 import multer from 'multer';
 import axios from 'axios';
 import FormData from 'form-data';
+
+const envFile = process.env.ENV_FILE || '.env';
+dotenv.config({
+    path: path.resolve(process.cwd(), envFile),
+});
 
 const app = express();
 const PORT = process.env.PORT || 3666;
@@ -62,8 +68,7 @@ app.post('/webhook', upload.any(), (req, res) => {
 
     form.append('payload_json', JSON.stringify(discordMessage));
 
-    if (!!req.files)
-    {
+    if (!!req.files) {
         var files = req.files as Express.Multer.File[];
         const file = files.find((f) => f.fieldname === 'thumb');
         if (!!file) {
