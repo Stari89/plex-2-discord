@@ -114,3 +114,7 @@ const notifyPlexStatus = (content: string) => {
 };
 
 setInterval(checkPlexStatus, 60 * 1000);
+
+app.listen(PORT, () => {
+    console.log(`plex-2-discord id running on port ${PORT}!`);
+});
