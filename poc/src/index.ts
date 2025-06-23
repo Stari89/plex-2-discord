@@ -13,6 +13,8 @@ dotenv.config({
 
 const app = express();
 const PORT = process.env.PORT || 3666;
+const ONLINE_STATUS_CHECK_INTERVAL_IN_SECONDS = 60;
+const ONLINE_STATUS_CHECK_NOTIFY_AFTER_RETRIES = 5;
 
 // Set up multer for parsing multipart/form-data
 const upload = multer();
@@ -87,6 +89,8 @@ app.post('/webhook', upload.any(), (req, res) => {
 });
 
 let isOnline: boolean | null = null;
+let retries = 0;
+let notified = false;
 
 const checkPlexStatus = () => {
     axios
@@ -99,13 +103,17 @@ const checkPlexStatus = () => {
                 notifyPlexStatus('✅ Plex server is now **online**!');
             }
             isOnline = true;
+            notified = false;
+            retries = 0;
         })
         .catch((err) => {
-            if (isOnline) {
+            isOnline = false;
+            retries++;
+            if (!notified && retries >= ONLINE_STATUS_CHECK_NOTIFY_AFTER_RETRIES) {
                 console.log('notify offline!');
+                notified = true;
                 notifyPlexStatus('❌ Plex server is **offline**!');
             }
-            isOnline = false;
         });
 };
 
